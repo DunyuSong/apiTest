@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.api.test.dao.JarInfoDao">
+    <!--<insert id="addInterface" parameterType="java.util.List">-->
+    <insert id="addInterface">
+        insert into
+        jar_plugins_info(id,packageName,voidName,params,url,assertPath,isDelete)
+        values
+        <!--<foreach collection="list" item="item" index="index" separator=",">-->
+        (
+          #{id},
+          #{packageName},
+          #{voidName},
+          #{params},
+          #{url},
+          #{assertPath},
+          #{isDelete})
+        <!--</foreach>-->
+    </insert>
+
+</mapper>

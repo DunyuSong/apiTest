@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.api.test.dao.UserDao">
+    <select id="queryAll" resultType="com.api.test.entity.UserEntity">
+        select * from user limit 1
+    </select>
+
+    <update id="updateUser" parameterType="com.api.test.entity.TestCaseEntity">
+        update user set caseLevel="P1" where id =#{id}
+    </update>
+
+    <insert id="addUser">
+        insert into
+        user(age,username)
+        values(#{age},#{username})
+    </insert>
+
+
+</mapper>
