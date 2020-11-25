@@ -4,17 +4,14 @@ import lombok.Data;
 
 /**
  * @author xiaoyu
- * @create 2020-11-06
- * @description
+ * @create 2020-11-25
+ * @description jar包信息
  */
 @Data
 public class JarInfoEntity {
     Integer id;
-    String packageName;
-    String voidName;
-    String params;
+    Integer jarVersion;
+    String jarName;
     String url;
-    String assertPath;
-    Integer isDelete;
-
+    String salt;
 }
