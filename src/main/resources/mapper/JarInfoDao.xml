@@ -14,7 +14,7 @@
     </insert>
 
     <select id="queryById" resultType="com.api.test.entity.JarInfoEntity">
-        select * from jar_info where id =#{id}
+        select id id,jar_version jarVersion,jar_name jarName,url url,salt salt from jar_info where id =#{id}
     </select>
 
 </mapper>

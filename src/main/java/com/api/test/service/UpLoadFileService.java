@@ -1,6 +1,7 @@
 package com.api.test.service;
 
 import com.api.test.common.util.MD5Utils;
+import com.api.test.dao.JarInfoDao;
 import com.api.test.entity.JarInfoEntity;
 import com.api.test.entity.JarInfoPluginsEntity;
 import com.api.test.result.Result;
@@ -15,6 +16,8 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -25,14 +28,15 @@ public class UpLoadFileService {
     @Resource
     JarInfoServiceImp jarInfoServiceImp;
 
+    @Resource
+    JarInfoDao jarInfoDao;
+
     private final String BASE_PATH = "/Users/warmwater/Desktop/testjar/uploadtest/";
 
-
+    String targetFilePath = BASE_PATH;
     public Result uploadJar(MultipartFile jarFile) throws IOException {
 
         Result result = new Result();
-
-        String targetFilePath = BASE_PATH;
         //判断是否是jar文件
         if (jarFile.getOriginalFilename().endsWith(".jar")) {
             File targetFile = new File(targetFilePath);
@@ -56,22 +60,15 @@ public class UpLoadFileService {
                         jarInfoEntity.setSalt(MD5);
                         jarInfoEntity.setUrl(url);
                         jarInfoEntity.setJarName(jarFile.getOriginalFilename());
-                        boolean jarInfo = jarInfoServiceImp.addJar(jarInfoEntity);
-                        if (!jarInfo == true){
-                            result.setCode(1);
-                            result.setMsg("添加jar包到信息管理失败");
-                        }
-
+                        this.uploadjarInfo(jarInfoEntity);
                         //扫描jar包,解析jar包
                         JarInfoPluginsEntity jarInfoPluginsEntity = new JarInfoPluginsEntity();
-
                         jarInfoPluginsEntity.setUrl(url);
                         log.info("解析路径："+url);
                         log.info("文件名："+jarFile.getOriginalFilename());
-                        boolean jarInfoPluginsResult = jarInfoPluginsServiceImp.addInterface(jarInfoPluginsEntity);
+                        this.jarInfoPlugins(jarInfoPluginsEntity);
                         result.setCode(0);
-                        result.setData(jarInfoPluginsResult);
-                        result.setMsg("上传解析成功");
+                        result.setMsg("上传成功");
                         return result;
                     } else {
                         result.setCode(1);
@@ -92,4 +89,69 @@ public class UpLoadFileService {
         }
         return result;
     }
+
+
+    public Result updateloadJar(MultipartFile jarFile, Integer id) {
+
+        List<JarInfoEntity> jarInfoEntityList = jarInfoDao.queryById(id);
+        //根据id查询到salt
+        String salt = jarInfoEntityList.get(0).getSalt();
+        log.info("该id的salt是：" + salt);
+
+        //如果salt一样，更新失败
+        File sourceFile = new File(targetFilePath + File.separator + jarFile.getOriginalFilename());
+        String MD5 = MD5Utils.getFileMD5String(sourceFile);
+        log.info("上传的文件加密后的md5是：" + MD5);
+        if (MD5.equals(salt)) {
+            Result result = new Result();
+            result.setCode(1);
+            result.setMsg("该jar包已存在，上传失败");
+            return result;
+        } else {
+            //如果salt不一样，更新成功，并添加到jar包管理，并且版本号+1
+            String url = BASE_PATH + jarFile.getOriginalFilename();
+            JarInfoEntity jarInfoEntity = new JarInfoEntity();
+            jarInfoEntity.setJarVersion(jarInfoEntityList.get(0).getJarVersion() + 1);
+            jarInfoEntity.setSalt(MD5);
+            jarInfoEntity.setUrl(url);
+            jarInfoEntity.setJarName(jarFile.getOriginalFilename());
+            this.uploadjarInfo(jarInfoEntity);
+
+            Result result = new Result();
+            result.setCode(0);
+            result.setMsg("新版本上传成功");
+            return result;
+
+        }
+    }
+
+
+
+
+
+
+    public boolean uploadjarInfo(JarInfoEntity jarInfoEntity){
+        Result result = new Result();
+        boolean jarInfo = jarInfoServiceImp.addJar(jarInfoEntity);
+        if (!jarInfo == true){
+            result.setCode(1);
+            result.setMsg("添加jar包到信息管理失败");
+            return false;
+        }else {
+            return true;
+        }
+    }
+
+    public boolean jarInfoPlugins(JarInfoPluginsEntity jarInfoPluginsEntity) throws MalformedURLException, ClassNotFoundException {
+        Result result = new Result();
+        boolean jarInfoPluginsResult = jarInfoPluginsServiceImp.addInterface(jarInfoPluginsEntity);
+        if (!jarInfoPluginsResult == true){
+            result.setCode(1);
+            result.setMsg("解析jar包失败");
+            return false;
+        }else {
+            return true;
+        }
+    }
 }
+
