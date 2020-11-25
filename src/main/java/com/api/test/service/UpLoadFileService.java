@@ -1,9 +1,11 @@
 package com.api.test.service;
 
 import com.api.test.common.util.MD5Utils;
+import com.api.test.entity.JarInfoEntity;
 import com.api.test.entity.JarInfoPluginsEntity;
 import com.api.test.result.Result;
 import com.api.test.service.impl.JarInfoPluginsServiceImp;
+import com.api.test.service.impl.JarInfoServiceImp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,9 @@ import java.io.IOException;
 public class UpLoadFileService {
     @Resource
     JarInfoPluginsServiceImp jarInfoPluginsServiceImp;
+
+    @Resource
+    JarInfoServiceImp jarInfoServiceImp;
 
     private final String BASE_PATH = "/Users/warmwater/Desktop/testjar/uploadtest/";
 
@@ -44,15 +49,28 @@ public class UpLoadFileService {
                 log.info("MD5值" + MD5);
                 {
                     if (!MD5.equals("5cbf1883bb59520d96ab647b3fc59298")) {
+                        String url = BASE_PATH+jarFile.getOriginalFilename();
+                        //上传jar包到jar包信息管理
+                        JarInfoEntity jarInfoEntity = new JarInfoEntity();
+                        jarInfoEntity.setJarVersion(0);
+                        jarInfoEntity.setSalt(MD5);
+                        jarInfoEntity.setUrl(url);
+                        jarInfoEntity.setJarName(jarFile.getOriginalFilename());
+                        boolean jarInfo = jarInfoServiceImp.addJar(jarInfoEntity);
+                        if (!jarInfo == true){
+                            result.setCode(1);
+                            result.setMsg("添加jar包到信息管理失败");
+                        }
+
                         //扫描jar包,解析jar包
                         JarInfoPluginsEntity jarInfoPluginsEntity = new JarInfoPluginsEntity();
-                        String url = BASE_PATH+jarFile.getOriginalFilename();
+
                         jarInfoPluginsEntity.setUrl(url);
                         log.info("解析路径："+url);
                         log.info("文件名："+jarFile.getOriginalFilename());
-                        boolean jarInfoResult = jarInfoPluginsServiceImp.addInterface(jarInfoPluginsEntity);
+                        boolean jarInfoPluginsResult = jarInfoPluginsServiceImp.addInterface(jarInfoPluginsEntity);
                         result.setCode(0);
-                        result.setData(jarInfoResult);
+                        result.setData(jarInfoPluginsResult);
                         result.setMsg("上传解析成功");
                         return result;
                     } else {

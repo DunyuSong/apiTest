@@ -20,7 +20,7 @@ import java.net.MalformedURLException;
 
 
 @RestController
-@RequestMapping("/jar")
+@RequestMapping("/jarInfoPlugins")
 public class JarInfoPluginsController {
     @Resource
     JarInfoPluginsServiceImp jarInfoPluginsServiceImp;
@@ -38,4 +38,7 @@ public class JarInfoPluginsController {
     public Result uploadJar(@RequestParam("uploadJar") MultipartFile jarFile) throws IOException {
         return upLoadFileService.uploadJar(jarFile);
     }
+
+
+
 }

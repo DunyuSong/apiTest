@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.api.test.dao.JarInfoDao">
+    <insert id="addJar" parameterType="JarInfoEntity">
+        insert into
+        jar_info(id,jar_version,jar_name,url,salt)
+        values
+        (
+          #{id},
+          #{jarVersion},
+          #{jarName},
+          #{url},
+          #{salt})
+    </insert>
+
+    <select id="queryById" resultType="com.api.test.entity.JarInfoEntity">
+        select * from jar_info where id =#{id}
+    </select>
+
+</mapper>
