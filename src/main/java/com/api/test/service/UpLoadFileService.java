@@ -34,6 +34,7 @@ public class UpLoadFileService {
     private final String BASE_PATH = "/Users/warmwater/Desktop/testjar/uploadtest/";
 
     String targetFilePath = BASE_PATH;
+
     public Result uploadJar(MultipartFile jarFile) throws IOException {
 
         Result result = new Result();
@@ -53,7 +54,7 @@ public class UpLoadFileService {
                 log.info("MD5值" + MD5);
                 {
                     if (!MD5.equals("5cbf1883bb59520d96ab647b3fc59298")) {
-                        String url = BASE_PATH+jarFile.getOriginalFilename();
+                        String url = BASE_PATH + jarFile.getOriginalFilename();
                         //上传jar包到jar包信息管理
                         JarInfoEntity jarInfoEntity = new JarInfoEntity();
                         jarInfoEntity.setJarVersion(0);
@@ -64,8 +65,8 @@ public class UpLoadFileService {
                         //扫描jar包,解析jar包
                         JarInfoPluginsEntity jarInfoPluginsEntity = new JarInfoPluginsEntity();
                         jarInfoPluginsEntity.setUrl(url);
-                        log.info("解析路径："+url);
-                        log.info("文件名："+jarFile.getOriginalFilename());
+                        log.info("解析路径：" + url);
+                        log.info("文件名：" + jarFile.getOriginalFilename());
                         this.jarInfoPlugins(jarInfoPluginsEntity);
                         result.setCode(0);
                         result.setMsg("上传成功");
@@ -92,37 +93,37 @@ public class UpLoadFileService {
 
 
     public Result updateloadJar(MultipartFile jarFile, Integer id) {
+        Result result = new Result();
+        //判断是否是jar文件
+        if (jarFile.getOriginalFilename().endsWith(".jar")) {
 
-        List<JarInfoEntity> jarInfoEntityList = jarInfoDao.queryById(id);
-        //根据id查询到salt
-        String salt = jarInfoEntityList.get(0).getSalt();
-        log.info("该id的salt是：" + salt);
+            List<JarInfoEntity> jarInfoEntityList = jarInfoDao.queryById(id);
+            //根据id查询到salt
+            String salt = jarInfoEntityList.get(0).getSalt();
+            log.info("该id的salt是：" + salt);
 
-        //如果salt一样，更新失败
-        File sourceFile = new File(targetFilePath + File.separator + jarFile.getOriginalFilename());
-        String MD5 = MD5Utils.getFileMD5String(sourceFile);
-        log.info("上传的文件加密后的md5是：" + MD5);
-        if (MD5.equals(salt)) {
-            Result result = new Result();
-            result.setCode(1);
-            result.setMsg("该jar包已存在，上传失败");
-            return result;
-        } else {
-            //如果salt不一样，更新成功，并添加到jar包管理，并且版本号+1
-            String url = BASE_PATH + jarFile.getOriginalFilename();
-            JarInfoEntity jarInfoEntity = new JarInfoEntity();
-            jarInfoEntity.setJarVersion(jarInfoEntityList.get(0).getJarVersion() + 1);
-            jarInfoEntity.setSalt(MD5);
-            jarInfoEntity.setUrl(url);
-            jarInfoEntity.setJarName(jarFile.getOriginalFilename());
-            this.uploadjarInfo(jarInfoEntity);
-
-            Result result = new Result();
-            result.setCode(0);
-            result.setMsg("新版本上传成功");
-            return result;
-
+            //如果salt一样，更新失败
+            File sourceFile = new File(targetFilePath + File.separator + jarFile.getOriginalFilename());
+            String MD5 = MD5Utils.getFileMD5String(sourceFile);
+            log.info("上传的文件加密后的md5是：" + MD5);
+            if (MD5.equals(salt)) {
+                result.setCode(1);
+                result.setMsg("该jar包已存在，上传失败");
+                return result;
+            } else {
+                //如果salt不一样，更新成功，并添加到jar包管理，并且版本号+1
+                String url = BASE_PATH + jarFile.getOriginalFilename();
+                JarInfoEntity jarInfoEntity = new JarInfoEntity();
+                jarInfoEntity.setJarVersion(jarInfoEntityList.get(0).getJarVersion() + 1);
+                jarInfoEntity.setSalt(MD5);
+                jarInfoEntity.setUrl(url);
+                jarInfoEntity.setJarName(jarFile.getOriginalFilename());
+                this.uploadjarInfo(jarInfoEntity);
+                result.setCode(0);
+                result.setMsg("新版本上传成功");
+            }
         }
+        return result;
     }
 
 
